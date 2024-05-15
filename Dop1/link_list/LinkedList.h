@@ -4,7 +4,6 @@ public:
 
     LinkedList() : head(new LNode<T>()), tail(new LNode<T>()) {
         head->next = tail;
-        tail->prev = head;
     }
     LinkedList(const LinkedList& other) {
         *this = other;
@@ -43,10 +42,12 @@ public:
     // Добавление элемента в конец списка.
     void push_back(const T& value) {
         LNode<T>* new_LNode = new LNode<T>(value);
-        new_LNode->prev = tail->prev;
-        tail->prev->next = new_LNode;
+        LNode<T>* current = head;
+        while (current->next != tail) {
+            current = current->next;
+        }
         new_LNode->next = tail;
-        tail->prev = new_LNode;
+        current->next = new_LNode;
         ++size_;
     }
 
@@ -54,8 +55,6 @@ public:
     void push_front(const T& value) {
         LNode<T>* new_LNode = new LNode<T>(value);
         new_LNode->next = head->next;
-        head->next->prev = new_LNode;
-        new_LNode->prev = head;
         head->next = new_LNode;
         ++size_;
     }
@@ -70,14 +69,12 @@ public:
         }
         else {
             LNode<T>* new_LNode = new LNode<T>(value);
-            LNode<T>* current = head->next;
+            LNode<T>* current = head;
             for (size_t i = 0; i < idx; ++i) {
                 current = current->next;
             }
-            new_LNode->prev = current->prev;
-            current->prev->next = new_LNode;
-            new_LNode->next = current;
-            current->prev = new_LNode;
+            new_LNode->next = current->next;
+            current->next = new_LNode;
             ++size_;
         }
     }
@@ -87,9 +84,12 @@ public:
         if (size_ == 0) {
             return;
         }
-        LNode<T>* LNode_to_delete = tail->prev;
-        tail->prev = LNode_to_delete->prev;
-        LNode_to_delete->prev->next = tail;
+        LNode<T>* current = head;
+        while (current->next->next != tail) {
+            current = current->next;
+        }
+        LNode<T>* LNode_to_delete = current->next;
+        current->next = tail;
         delete LNode_to_delete;
         --size_;
     }
@@ -101,7 +101,6 @@ public:
         }
         LNode<T>* LNode_to_delete = head->next;
         head->next = LNode_to_delete->next;
-        LNode_to_delete->next->prev = head;
         delete LNode_to_delete;
         --size_;
     }
@@ -115,13 +114,13 @@ public:
             pop_back();
         }
         else {
-            LNode<T>* current = head->next;
+            LNode<T>* current = head;
             for (size_t i = 0; i < idx; ++i) {
                 current = current->next;
             }
-            current->prev->next = current->next;
-            current->next->prev = current->prev;
-            delete current;
+            LNode<T>* LNode_to_delete = current->next;
+            current->next = LNode_to_delete->next;
+            delete LNode_to_delete;
             --size_;
         }
     }
@@ -180,7 +179,11 @@ public:
         if (size_ == 0) {
             throw std::runtime_error("Список пуст.");
         }
-        return tail->prev->value;
+        LNode<T>* current = head;
+        while (current->next != tail) {
+            current = current->next;
+        }
+        return current->value;
     }
 
     ListIterator<T> begin() {

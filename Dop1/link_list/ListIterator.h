@@ -16,10 +16,10 @@ public:
         return *this;
     }
 
-    ListIterator<T>& operator--() {
+   /* ListIterator<T>& operator--() {
         current = current->prev;
         return *this;
-    }
+    }*/
 
     bool operator==(const ListIterator<T>& other) const {
         return current == other.current;
