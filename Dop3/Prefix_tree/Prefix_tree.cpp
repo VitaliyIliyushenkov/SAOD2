@@ -8,64 +8,73 @@
 #include <chrono>
 using namespace std;
 
-
 class TrieNode {
 public:
-    TrieNode() : is_end_of_word(false), count(0) {}
+    char value;
+    std::unordered_map<char, std::shared_ptr<TrieNode>> children;
+    std::unordered_set<char> childs;
+    bool isEndOfWord;
+    int count;
 
-    void insert(const std::string& word, size_t index = 0) {
-        if (index == word.size()) {
-            is_end_of_word = true;
-            count++;
-        }
-        else {
-            char c = word[index];
-            if (children.find(c) == children.end()) {
-                children.insert(std::make_pair(c, std::make_unique<TrieNode>()));
+    TrieNode(char val) : value(val), isEndOfWord(false), count(0) {}
+};
+
+class Trie {
+public:
+    Trie() : root(std::make_shared<TrieNode>('\0')), nodeCount(1) {}
+
+    void insert(const std::string& word) {
+        auto current = root;
+        for (char ch : word) {
+            if (current->children.find(ch) == current->children.end()) {
+                current->children[ch] = std::make_shared<TrieNode>(ch);
+                current->childs.insert(ch);
+                ++nodeCount;
             }
-            children[c]->insert(word, index + 1);
+            current = current->children[ch];
         }
+        current->isEndOfWord = true;
+        ++current->count;
     }
 
-    size_t find(const std::string& word, size_t index = 0) const {
-        if (index == word.size()) {
-            return count;
+    int find(const std::string& word) {
+        auto current = root;
+        for (char ch : word) {
+            if (current->children.find(ch) == current->children.end()) {
+                return 0;
+            }
+            current = current->children[ch];
         }
-        char c = word[index];
-        if (children.find(c) == children.end()) {
-            return 0;
-        }
-        return children.at(c)->find(word, index + 1);
+        return current->isEndOfWord ? current->count : 0;
     }
 
-    size_t size() const {
-        size_t total = 0;
-        if (is_end_of_word) {
-            total += count;
-        }
-        for (const auto& child : children) {
-            total += child.second->size();
-        }
-        return total;
+    size_t size() {
+        return sizeCount(root);
     }
 
-    size_t NodeCount() const {
-        size_t total = 1; // Считаем текущий узел
-        for (const auto& child : children) {
-            total += child.second->NodeCount();
-        }
-        return total;
+    size_t NodeCount() {
+        return nodeCount;
     }
 
 private:
-    std::unordered_map<char, std::unique_ptr<TrieNode>> children;
-    bool is_end_of_word;
-    size_t count;
+    std::shared_ptr<TrieNode> root;
+    size_t nodeCount;
+
+    size_t sizeCount(const std::shared_ptr<TrieNode>& node) {
+        size_t count = 0;
+        if (node->isEndOfWord) {
+            count++;
+        }
+        for (const auto& child : node->children) {
+            count += sizeCount(child.second);
+        }
+        return count;
+    }
 };
 
-void trieDict(const std::string& text, std::string word) {
-    TrieNode trie;
-    std::string str = "";
+void triedict(const std::string& text, std::string word) {
+    Trie trie;
+    string str = "";
     for (const auto& ch : text) {
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '\'') {
             str += ch;
@@ -78,9 +87,10 @@ void trieDict(const std::string& text, std::string word) {
     if (str.size() > 0) {
         trie.insert(str);
     }
-    std::cout << "\ntrie size: " << trie.size() << std::endl;
-    std::cout << word << ": " << trie.find(word) << std::endl;
-    std::cout << "Node count: " << trie.NodeCount() << std::endl;
+
+    cout << "\ndict size: " << trie.size() << endl;
+    cout << "\nnodecount" << ": " << trie.NodeCount() << endl;
+    cout << word << ": " << trie.find(word) << endl;
 }
 
 void umapdict(const std::string& text, std::string word) {
@@ -169,9 +179,9 @@ int main() {
     time_two = chrono::high_resolution_clock::now();
     cout << "smap\t" << chrono::duration<double>(time_two - time_one).count() << endl;
 
-    time_one = chrono::high_resolution_clock::now();
-    trieDict(text, word);
-    time_two = chrono::high_resolution_clock::now();
+    auto time_one = chrono::high_resolution_clock::now();
+    triedict(text, word);
+    auto time_two = chrono::high_resolution_clock::now();
     cout << "trie\t" << chrono::duration<double>(time_two - time_one).count() << endl;
 
 
