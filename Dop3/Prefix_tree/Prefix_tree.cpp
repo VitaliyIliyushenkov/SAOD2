@@ -89,7 +89,7 @@ void triedict(const std::string& text, std::string word) {
     }
 
     cout << "\ndict size: " << trie.size() << endl;
-    cout << "\nnodecount" << ": " << trie.NodeCount() << endl;
+    cout << "nodecount" << ": " << trie.NodeCount() << endl;
     cout << word << ": " << trie.find(word) << endl;
 }
 
@@ -169,21 +169,21 @@ int main() {
     text.append((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
 
     string word = "wiki"; // слово которое ищем
-    auto time_one = chrono::high_resolution_clock::now();
-    umap(text, word);
-    auto time_two = chrono::high_resolution_clock::now();
-    cout << "umap\t" << chrono::duration<double>(time_two - time_one).count() << endl;
-
-    time_one = chrono::high_resolution_clock::now();
-    umap_slice(text, word);
-    time_two = chrono::high_resolution_clock::now();
-    cout << "smap\t" << chrono::duration<double>(time_two - time_one).count() << endl;
 
     auto time_one = chrono::high_resolution_clock::now();
     triedict(text, word);
     auto time_two = chrono::high_resolution_clock::now();
     cout << "trie\t" << chrono::duration<double>(time_two - time_one).count() << endl;
 
+    time_one = chrono::high_resolution_clock::now();
+    umap(text, word);
+    time_two = chrono::high_resolution_clock::now();
+    cout << "umap\t" << chrono::duration<double>(time_two - time_one).count() << endl;
+
+    time_one = chrono::high_resolution_clock::now();
+    umap_slice(text, word);
+    time_two = chrono::high_resolution_clock::now();
+    cout << "smap\t" << chrono::duration<double>(time_two - time_one).count() << endl;
 
     return 0;
 }
