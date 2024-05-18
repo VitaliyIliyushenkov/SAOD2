@@ -1,0 +1,7 @@
+Посмотреть справку help:
+./archive -h
+Для сжатия файла:
+./archive -c input.txt output.compressed
+Для распаковки файла:
+./archive -d output.compressed output.txt
+
