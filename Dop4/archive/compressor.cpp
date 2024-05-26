@@ -5,9 +5,13 @@
 #include <cmath>
 #include <sstream>
 #include <iostream>
+#include <sys/stat.h>
+
 
 
 std::string intToBinaryString(int number) {
+    // Эта функция преобразует целое число в двоичное представление в виде строки
+    //intToBinaryString(97) вернёт "1100001"
     std::string binary;
     while (number > 0) {
         binary = (number % 2 == 0 ? "0" : "1") + binary;
@@ -17,6 +21,8 @@ std::string intToBinaryString(int number) {
 }
 
 std::string Compressor::eliasGammaEncode(int number) {
+    //Эта функция реализует кодирование методом Элиаса Гаммы
+    //Для числа 97 (1100001 в двоичной) кодировка будет 00000001100001
     if (number <= 0) {
         throw std::invalid_argument("Number must be positive");
     }
@@ -48,7 +54,14 @@ int Compressor::eliasGammaDecode(const std::string& bits, size_t& offset) {
     return decodedNumber;
 }
 
-void Compressor::compress(const std::string& inputFile, const std::string& outputFile) {
+size_t Compressor::getFileSize(const std::string& fileName) {
+    struct stat stat_buf;
+    int rc = stat(fileName.c_str(), &stat_buf);
+    return rc == 0 ? stat_buf.st_size : -1;
+}
+
+size_t Compressor::compress(const std::string& inputFile, const std::string& outputFile) {
+    //Символ 'a' (ASCII 97): eliasGammaEncode(97) вернёт 00000001100001
     std::ifstream input(inputFile, std::ios::binary);
     if (!input.is_open()) {
         throw std::runtime_error("Cannot open input file");
@@ -80,7 +93,10 @@ void Compressor::compress(const std::string& inputFile, const std::string& outpu
 
     input.close();
     output.close();
+
+    return getFileSize(outputFile);
 }
+
 
 void Compressor::decompress(const std::string& inputFile, const std::string& outputFile) {
     std::ifstream input(inputFile, std::ios::binary);

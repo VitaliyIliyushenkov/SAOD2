@@ -14,17 +14,21 @@ int main(int argc, char** argv) {
         auto start = std::chrono::high_resolution_clock::now();
 
         if (cli.isCompress()) {
+            std::cout << "Done!\n";
             std::cout << "Compressing file: " << cli.getInputFile() << std::endl;
-            Compressor::compress(cli.getInputFile(), cli.getOutputFile());
+            size_t originalSize = Compressor::getFileSize(cli.getInputFile());
+            size_t compressedSize = Compressor::compress(cli.getInputFile(), cli.getOutputFile());
+            std::cout << "Compression ratio: " << originalSize << " bytes / " << compressedSize << " bytes = "
+                << static_cast<double>(originalSize) / compressedSize << std::endl;
         }
         else if (cli.isDecompress()) {
+            std::cout << "Done!\n";
             std::cout << "Decompressing file: " << cli.getInputFile() << std::endl;
             Compressor::decompress(cli.getInputFile(), cli.getOutputFile());
         }
 
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
-        std::cout << "Done!\n";
         std::cout << "Time taken: " << elapsed.count() << " sec\n";
     }
     catch (const std::exception& e) {
